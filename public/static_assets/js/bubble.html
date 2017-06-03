@@ -1,0 +1,97 @@
+<html>
+	<head>
+		<script src="https://d3js.org/d3.v4.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	</head>
+	<style>
+		g {
+			fill: red;
+		}
+	</style>
+	<body>
+		<div id="bubble" width="720" height="720"></div>
+	</body>
+	<script>
+		d3.queue()
+	    	.defer(d3.json, "sectors.json") //<------------- I. - Organise data so as to minimize parsing on the client-side
+	    	.await(bubble)	
+	    	
+
+	    function bubble(error,data) {
+	    	if (error) throw error;
+	    	    	
+	    	console.log(data);
+
+	    	var element = "#bubble";
+	    	var configurations = { //<------------- II. - Set configuration
+            	data: data,
+            	html: element,
+            	width: d3.select(element).attr("width"),
+            	height: d3.select(element).attr("height")
+        	};
+        	generateBubble(configurations);
+	    	function generateBubble(config) {
+	    		var data = config.data,
+	    			sectors = data["sectors"];
+            	var html = config.html,
+                	width = config.width,
+                	height = config.height;
+	    		var svg = d3.select(html).append("svg")
+    				.attr("width", width)
+    				.attr("height", height);
+    				//.attr("class", "bubble");
+    			var color = d3.scaleOrdinal()
+    				.domain(sectors)   
+    				.range(d3.schemeCategory20c);
+    			var pack = d3.pack()//creates a new pack layout with default settings: https://github.com/d3/d3-hierarchy/blob/master/README.md#pack
+    				.size([width, height])
+    				.padding(1.5);
+    				
+    			var root = d3.hierarchy(data)//https://github.com/d3/d3-hierarchy/blob/master/README.md#hierarchy
+    			    .sum(function(d) { return d.mktcap; })
+      				.sort(function(a, b) { return b.value - a.value; });
+				var node = svg.selectAll(".node")
+    				.data(pack(root).leaves())
+    				.enter().append("g")
+      				.attr("class", "node")
+      				.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+      			node.append("circle")
+      				.attr("id", function(d) { return d.id; })
+      				.attr("class", function(d) { return d.data.sector.replace(/\//g, '').replace(/\s/g, "").toLowerCase() })
+      				.attr("r", function(d) { return d.r; })
+      				.style("fill", "lightgray")
+		            .on("mousemove", function(d) {
+                    	d3.selectAll("."+d.data.sector.replace(/\//g, '').replace(/\s/g, "").toLowerCase()).style("fill", d3.rgb(color(d.data.sector)).darker(1));
+                	})
+                	.on("mouseout", function(d) {
+          				d3.selectAll("."+d.data.sector.replace(/\//g, '').replace(/\s/g, "").toLowerCase()).style("fill", "lightgray");
+                	});
+
+				console.log(pack(root).leaves())
+				
+				function pulse(item,g) {
+					var circle = d3.select(item)
+						.transition().duration(500)
+						.attr("r",g);
+						
+					/*(function repeat(v,g) {
+					circle = circle.transition()
+						.duration(2000)
+						.attr("stroke-width", 20)
+						.attr("r", v)
+						.transition()
+						.duration(2000)
+						.attr('stroke-width', 0.5)
+						.attr("r", g)
+						.ease('sine')
+						.each("end", repeat);
+					})();*/
+    			}
+	    	}
+	    }
+	    
+	</script>
+</html>
+
+
