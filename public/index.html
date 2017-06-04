@@ -13,9 +13,9 @@
         font-family: 'Ubuntu', sans-serif;
     }
 
-    * {
-        margin: auto;
-        padding: auto;
+    div#wrapper {
+        min-width: 1360px;
+        min-height: 720px;
     }
 
     .grid-item {
@@ -28,9 +28,9 @@
     }
 
     .grid-item#parabola {
-		margin-left: auto;
-		margin-right: auto;
-        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 420px;
         max-height: 720px;
         overflow-y: scroll;
     }
@@ -65,20 +65,29 @@
         fill: none;
         opacity: .75;
     }
-    
+
     foreignObject.label {
-    	color: gray;
+        color: gray;
     }
-    
 </style>
 
 <body>
-    <!--<div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 0 }'>-->
-	<div class="grid-item" id="parabola" width="680" height="680"></div>
-    <div class="grid-item" id="bubbleplot" width="820" height="680"></div>
+    <div id="wrapper">
+        <!--<div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 0 }'>-->
+        <!--<div class="grid-item" id="parabola" width="680" height="680"></div>-->
+        <!--<div class="grid-item" id="bubbleplot" width="820" height="680"></div>-->
+        <div class="grid-item" id="parabola"></div>
+        <div class="grid-item" id="bubbleplot"></div>
+    </div>
     <!--</div>-->
 </body>
 <script>
+    var windowWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    var windowHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+
+
+
     d3.queue()
         .defer(d3.json, "./static_assets/js/sectors.json")
         .defer(d3.json, "./static_assets/js/sector.json")
@@ -86,25 +95,24 @@
             if (error) throw error;
             console.log(data);
 
-			var colorscale = ["#1e90ff", "#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
-			
+            var colorscale = ["#1e90ff", "#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+
             var bubbleplot = "#bubbleplot",
                 bubbleplotConfigs = {
                     data: data,
                     html: bubbleplot,
-                    width: d3.select(bubbleplot).attr("width"),
-                    height: d3.select(bubbleplot).attr("height"),
+                    width: windowWidth * .64,
+                    height: windowHeight,
                     colorscale: colorscale
                 };
             generateBubblePlot(bubbleplotConfigs);
-
 
             var sectors = data.sectors;
 
             $.each(sectors, function(index, value) {
 
-                var width = 240,
-                    height = 200;
+                var width = (windowWidth * .3) / 2,
+                    height = (windowHeight / 2.5);
                 var sector = value.replace(/\//g, '').replace(/\s/g, "").toLowerCase();
                 var parabola = $("<div />")
                     .attr("class", "nested-item")
