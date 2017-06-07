@@ -5,7 +5,7 @@ function generateParabolaPlot(config) {
         variance = d3.variance(data.map(function(d) {
             return d.ytd
         }));
-    console.log(data)
+
     var xdomain = d3.extent(data, function(d, i) {
             v = i == 0 ? d.ytd / 1.1 : d.ytd * 1.1;
             return v;
