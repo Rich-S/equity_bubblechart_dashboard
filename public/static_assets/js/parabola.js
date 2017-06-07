@@ -143,7 +143,6 @@ function generateParabolaPlot(config) {
                 ycoordinate: gaussianConstant * Math.exp(-gaussianVariant)
             });
         };
-        console.log(pdf);
         return pdf;
     };
 
